@@ -34,16 +34,16 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
       // fullyParallel: true,
     },
-    /*
+   
     {
       name: 'firefox',
       use: { ...devices['Desktop Firefox'] },
     },
     
     {
-      name: 'safari',
-      use: { ...devices['Desktop Safari'] },
+      name: 'webkit',
+      use: { ...devices['Desktop safari'] },
     },
-    */
+
   ],
 });
