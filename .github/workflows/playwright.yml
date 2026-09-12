@@ -28,23 +28,89 @@
 #         path: playwright-report/
 #         retention-days: 30
 
+
+# Sharding code - 
+
+# name: Playwright Tests
+
+# on:
+#   push:
+#     branches: [ main, master ]
+#   pull_request:
+#     branches: [ main, master ]
+#   workflow_dispatch:
+
+# jobs:
+#   test:
+#     timeout-minutes: 60
+#     runs-on: ubuntu-latest
+
+#     strategy:
+#       matrix:
+#         shard: [1, 2, 3, 4]   # total 4 shards
+
+#     steps:
+#       - uses: actions/checkout@v4
+
+#       - uses: actions/setup-node@v4
+#         with:
+#           node-version: lts/*
+
+#       - name: Install dependencies
+#         run: npm ci
+
+#       - name: Install Playwright Browsers
+#         run: npx playwright install --with-deps
+
+#       - name: Run Playwright tests (Shard ${{ matrix.shard }})
+#         run: npx playwright test --shard=${{ matrix.shard }}/4
+
+#       - uses: actions/upload-artifact@v4
+#         if: ${{ !cancelled() }}
+#         with:
+#           name: playwright-report-${{ matrix.shard }}
+#           path: playwright-report/
+#           retention-days: 30
+
+
+# Code to run individual or with dropdown options
 name: Playwright Tests
 
 on:
   push:
     branches: [ main, master ]
+
   pull_request:
     branches: [ main, master ]
+
   workflow_dispatch:
+    inputs:
+      test_type:
+        description: "Select what you want to run"
+        required: true
+        type: choice
+        options:
+          - All
+          - Regression
+          - Sanity
+          - Smoke
+          - Individual Test
+
+      test_file:
+        description: "Required only for Individual Test"
+        required: false
+        type: choice
+        options:
+          - tests.regression/combine.spec.ts
+          - tests.sanity/demoshop.spec.ts
+          - tests.smoke/demoblaze.spec.ts
+          - tests.smoke/google.spec.ts
+          - tests.smoke/saucedemo.spec.ts
 
 jobs:
   test:
     timeout-minutes: 60
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        shard: [1, 2, 3, 4]   # total 4 shards
 
     steps:
       - uses: actions/checkout@v4
@@ -59,12 +125,34 @@ jobs:
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
 
-      - name: Run Playwright tests (Shard ${{ matrix.shard }})
-        run: npx playwright test --shard=${{ matrix.shard }}/4
+      # Manual - Run All
+      - name: Run All Tests
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.test_type == 'All' }}
+        run: npx playwright test
+
+      # Manual - Regression
+      - name: Run Regression Tests
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.test_type == 'Regression' }}
+        run: npx playwright test tests.regression
+
+      # Manual - Sanity
+      - name: Run Sanity Tests
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.test_type == 'Sanity' }}
+        run: npx playwright test tests.sanity
+
+      # Manual - Smoke
+      - name: Run Smoke Tests
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.test_type == 'Smoke' }}
+        run: npx playwright test tests.smoke
+
+      # Manual - Individual Test
+      - name: Run Individual Test
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.test_type == 'Individual Test' }}
+        run: npx playwright test "${{ inputs.test_file }}"
 
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
-          name: playwright-report-${{ matrix.shard }}
+          name: playwright-report
           path: playwright-report/
           retention-days: 30
