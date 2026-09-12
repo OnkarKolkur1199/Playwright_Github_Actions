@@ -8,6 +8,7 @@ export default defineConfig({
   // reporter: [['list'], ['html', { open: 'never' }]],
   // reporter: 'html',
   reporter: [['html', { open: 'never'}],
+              ['github'],
               // ['list'],
               // ['line'],
               // ['dot'],
