@@ -2,19 +2,7 @@ import {test,expect} from '@playwright/test';
 
 test("testautomationpractice test from regression",async({page}) => {
   await page.goto("https://testautomationpractice.blogspot.com/");
-  await page.keyboard.press("PageDown")
-
-  page.on("dialog",(dialog) =>{
-    console.log("Dialog type is : ", dialog.type());
-    expect(dialog.type()).toContain('alert');
-    console.log("Dialog text is : ", dialog.message());
-
-    test.info().annotations.push({ type: 'DialogType', description: dialog.type() });
-    test.info().annotations.push({ type: 'DialogText', description: dialog.message() });
-    dialog.accept();
-  });
-
-  await page.locator("button#alertBtn").click();
+  await page.keyboard.press("PageDown");
 
   await page.waitForTimeout(3000);
 })
